@@ -1,0 +1,8 @@
+{application, provider_todo, [
+  {description, "example rebar3 plubin"},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {applications, [kernel, stdlib]},
+  {env, []}
+]}.
+
