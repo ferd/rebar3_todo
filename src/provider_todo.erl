@@ -1,10 +1,10 @@
 -module(provider_todo).
 -behaviour(provider).
 
--export([init/1, do/1]).
+-export([init/1, do/1, format_error/2]).
 
 -define(PROVIDER, todo).
--define(DEPS, [app_discovery]). % depend on dependencies beign fetched
+-define(DEPS, [install_deps]).
 
 %% ===================================================================
 %% Public API
@@ -17,7 +17,9 @@ init(State) ->
             {bare, true},            % The task can be run by the user, always true
             {deps, ?DEPS},           % The list of dependencies
             {example, "rebar todo"}, % How to use the plugin
-            {opts, []},              % list of options understood by the plugin
+            {opts, [                 % list of options understood by the plugin
+                {deps, $d, "deps", undefined, "also run against dependencies"}
+            ]},
             {short_desc, "Reports TODOs in source code"},
             {desc, "Scans top-level application source and find "
                    "instances of TODO: in commented out content "
@@ -28,8 +30,23 @@ init(State) ->
 
 -spec do(rebar_state:t()) -> {ok, rebar_state:t()} | {error, string()}.
 do(State) ->
-    lists:foreach(fun check_todo_app/1, rebar_state:project_apps(State)),
+    Apps = case discovery_type(State) of
+        project -> rebar_state:project_apps(State);
+        deps -> rebar_state:project_apps(State) ++ rebar_state:src_deps(State)
+    end,
+    lists:foreach(fun check_todo_app/1, Apps),
     {ok, State}.
+
+-spec format_error(any(), rebar_state:t()) ->  {iolist(), rebar_state:t()}.
+format_error(Reason, State) ->
+    {io_lib:format("~p", [Reason]), State}.
+
+discovery_type(State) ->
+    {Args, _} = rebar_state:command_parsed_args(State),
+    case proplists:get_value(deps, Args) of
+        undefined -> project;
+        _ -> deps
+    end.
 
 check_todo_app(App) ->
     Path = filename:join(rebar_app_info:dir(App),"src"),
