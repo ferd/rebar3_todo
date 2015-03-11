@@ -1,7 +1,7 @@
 -module(provider_todo).
 -behaviour(provider).
 
--export([init/1, do/1, format_error/2]).
+-export([init/1, do/1, format_error/1]).
 
 -define(PROVIDER, todo).
 -define(DEPS, [install_deps]).
@@ -37,9 +37,9 @@ do(State) ->
     lists:foreach(fun check_todo_app/1, Apps),
     {ok, State}.
 
--spec format_error(any(), rebar_state:t()) ->  {iolist(), rebar_state:t()}.
-format_error(Reason, State) ->
-    {io_lib:format("~p", [Reason]), State}.
+-spec format_error(any()) -> iolist().
+format_error(Reason) ->
+    io_lib:format("~p", [Reason]).
 
 discovery_type(State) ->
     {Args, _} = rebar_state:command_parsed_args(State),
