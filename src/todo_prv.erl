@@ -1,4 +1,4 @@
--module(provider_todo).
+-module(todo_prv).
 -behaviour(provider).
 
 -export([init/1, do/1, format_error/1]).
@@ -16,7 +16,7 @@ init(State) ->
             {module, ?MODULE},       % The module implementation of the task
             {bare, true},            % The task can be run by the user, always true
             {deps, ?DEPS},           % The list of dependencies
-            {example, "rebar todo"}, % How to use the plugin
+            {example, "rebar3 todo"}, % How to use the plugin
             {opts, [                 % list of options understood by the plugin
                 {deps, $d, "deps", undefined, "also run against dependencies"}
             ]},
@@ -32,7 +32,7 @@ init(State) ->
 do(State) ->
     Apps = case discovery_type(State) of
         project -> rebar_state:project_apps(State);
-        deps -> rebar_state:project_apps(State) ++ rebar_state:src_deps(State)
+        deps -> rebar_state:project_apps(State) ++ lists:usort(rebar_state:all_deps(State))
     end,
     lists:foreach(fun check_todo_app/1, Apps),
     {ok, State}.
