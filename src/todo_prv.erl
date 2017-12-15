@@ -67,7 +67,7 @@ check_todo_mod(ModPath, Matches) ->
     end.
 
 find_todo_lines(File) ->
-    case re:run(File, "%+.*(TODO:.*)", [{capture, all_but_first, binary}, global, caseless]) of
+    case re:run(File, "%+.*(TODO[: ].*)", [{capture, all_but_first, binary}, unicode, global, caseless]) of
         {match, DeepBins} -> lists:flatten(DeepBins);
         nomatch -> []
     end.
