@@ -1,4 +1,4 @@
--module(todo_prv).
+-module(rebar3_todo_prv).
 -behaviour(provider).
 
 -export([init/1, do/1, format_error/1]).
