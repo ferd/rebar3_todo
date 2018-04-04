@@ -57,7 +57,7 @@ check_todo_app(App) ->
     end.
 
 find_source_files(Path) ->
-    [filename:join(Path, Mod) || Mod <- filelib:wildcard("*.erl", Path)].
+    filelib:fold_files(Path, ".*\\.erl$", true, fun(File, Acc) -> [File|Acc] end, []).
 
 check_todo_mod(ModPath, Matches) ->
     {ok, Bin} = file:read_file(ModPath),
