@@ -49,15 +49,19 @@ discovery_type(State) ->
     end.
 
 check_todo_app(App) ->
-    Path = filename:join(rebar_app_info:dir(App),"src"),
-    Mods = find_source_files(Path),
+    Paths = rebar_dir:src_dirs(rebar_app_info:opts(App), ["src"]),
+    Mods = find_source_files(Paths),
     case lists:foldl(fun check_todo_mod/2, [], Mods) of
         [] -> ok;
         Instances -> display_todos(rebar_app_info:name(App), Instances)
     end.
 
-find_source_files(Path) ->
-    filelib:fold_files(Path, ".*\\.erl$", true, fun(File, Acc) -> [File|Acc] end, []).
+find_source_files(Paths) ->
+    find_source_files(Paths, []).
+find_source_files([], Files) ->
+    Files;
+find_source_files([Path | Rest], Files) ->
+    find_source_files(Rest, filelib:fold_files(Path, ".*\\.erl$", true, fun(File, Acc) -> [File|Acc] end, []) ++ Files).
 
 check_todo_mod(ModPath, Matches) ->
     {ok, Bin} = file:read_file(ModPath),
